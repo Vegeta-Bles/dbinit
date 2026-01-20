@@ -13,7 +13,7 @@ Interactive database initialization tool for setting up local databases with sec
 
 ## Installation
 
-### From PyPI (when published)
+### From pip
 
 ```bash
 pip install dbinit
