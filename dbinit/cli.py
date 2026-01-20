@@ -5,6 +5,7 @@ import click
 from pathlib import Path
 from .commands import create_project, show_credentials
 from .setup_wizard import run_setup_wizard, show_config
+from .config import get_config_value
 
 
 @click.group()
@@ -19,12 +20,17 @@ def cli():
 @click.option(
     "--db",
     type=click.Choice(["postgres", "sqlite"], case_sensitive=False),
-    required=True,
-    help="Database type: postgres or sqlite"
+    required=False,
+    help="Database type: postgres or sqlite (defaults to configured preference)"
 )
 def create(project: str, db: str):
     """Create a new database project with interactive credential setup."""
     try:
+        # Use configured default if --db not provided
+        if db is None:
+            db = get_config_value("default_db_type", "postgres")
+            click.echo(f"Using default database type: {db}")
+        
         create_project(project, db.lower())
     except KeyboardInterrupt:
         click.echo("\n\nOperation cancelled by user.", err=True)
