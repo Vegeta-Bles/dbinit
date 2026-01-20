@@ -7,7 +7,7 @@ from .commands import create_project, show_credentials
 
 
 @click.group()
-@click.version_option(version="0.1.0")
+@click.version_option(version="0.1.1")
 def cli():
     """dbinit - Interactive database initialization tool."""
     pass

@@ -9,11 +9,11 @@ long_description = readme_file.read_text() if readme_file.exists() else ""
 
 setup(
     name="dbinit",
-    version="0.1.0",
+    version="0.1.1",
     description="Interactive database initialization tool",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="Your Name",
+    author="Seth Pang",
     author_email="pang.seth@example.com",
     url="https://github.com/Vegeta-Bles/dbinit",
     license="MIT",
