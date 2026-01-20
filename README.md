@@ -38,6 +38,28 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
+## Initial Setup
+
+After installation, run the interactive setup wizard to configure dbinit:
+
+```bash
+dbinit setup
+```
+
+This will guide you through configuring:
+- Default project path (where new projects are created)
+- Default database type (postgres or sqlite)
+- Auto-start database option
+- Docker Compose command preference
+- Default editor
+
+View your current configuration:
+```bash
+dbinit setup --show
+```
+
+See [SETUP_GUIDE.md](SETUP_GUIDE.md) for detailed setup instructions.
+
 ## Usage
 
 ### Create a New Database Project

@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Tuple, Optional
 import click
 from .validators import validate_password_strength
+from .config import get_config_value, get_default_project_path
 from .generators import (
     generate_docker_compose,
     generate_env_file,
@@ -69,7 +70,12 @@ def create_project(project_name: str, db_type: str):
         project_name: Name of the project
         db_type: Type of database ('postgres' or 'sqlite')
     """
-    project_path = Path(project_name)
+    # Use configured default path if project name is relative
+    if not Path(project_name).is_absolute():
+        default_path = get_default_project_path()
+        project_path = default_path / project_name
+    else:
+        project_path = Path(project_name)
     
     # Check if project already exists
     if project_path.exists():
@@ -98,22 +104,35 @@ def create_project(project_name: str, db_type: str):
         env_content = generate_env_file(db_type, username, password, project_name)
         (project_path / ".env").write_text(env_content)
         
-        # Start the database
-        click.echo("\nStarting database container...")
-        try:
-            subprocess.run(
-                ["docker-compose", "up", "-d"],
-                cwd=project_path,
-                check=True,
-                capture_output=True
-            )
-            click.echo("✓ Database container started successfully!")
-        except subprocess.CalledProcessError as e:
-            click.echo(f"Warning: Failed to start database container: {e}", err=True)
-            click.echo("You can start it manually with: docker-compose up -d", err=True)
-        except FileNotFoundError:
-            click.echo("Warning: docker-compose not found. Please install Docker Compose.", err=True)
-            click.echo("You can start the database later with: docker-compose up -d", err=True)
+        # Start the database (if auto-start is enabled)
+        auto_start = get_config_value("auto_start_db", True)
+        if auto_start:
+            click.echo("\nStarting database container...")
+            compose_cmd = get_config_value("docker_compose_cmd", "docker-compose")
+            try:
+                # Handle both "docker-compose" and "docker compose" (v2)
+                if compose_cmd == "docker compose":
+                    cmd = ["docker", "compose", "up", "-d"]
+                else:
+                    cmd = [compose_cmd, "up", "-d"]
+                
+                subprocess.run(
+                    cmd,
+                    cwd=project_path,
+                    check=True,
+                    capture_output=True
+                )
+                click.echo("✓ Database container started successfully!")
+            except subprocess.CalledProcessError as e:
+                click.echo(f"Warning: Failed to start database container: {e}", err=True)
+                click.echo(f"You can start it manually with: {compose_cmd} up -d", err=True)
+            except FileNotFoundError:
+                click.echo("Warning: docker-compose not found. Please install Docker Compose.", err=True)
+                click.echo(f"You can start the database later with: {compose_cmd} up -d", err=True)
+        else:
+            click.echo("\nSkipping auto-start (disabled in configuration).")
+            compose_cmd = get_config_value("docker_compose_cmd", "docker-compose")
+            click.echo(f"Start manually with: cd {project_path} && {compose_cmd} up -d")
     
     elif db_type == "sqlite":
         # For SQLite, just create the .env file

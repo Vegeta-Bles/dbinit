@@ -4,10 +4,11 @@ import sys
 import click
 from pathlib import Path
 from .commands import create_project, show_credentials
+from .setup_wizard import run_setup_wizard, show_config
 
 
 @click.group()
-@click.version_option(version="0.1.1")
+@click.version_option(version="0.2.0")
 def cli():
     """dbinit - Interactive database initialization tool."""
     pass
@@ -55,6 +56,31 @@ def creds(show: bool, project: str):
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
         sys.exit(1)
+
+
+@cli.command()
+@click.option(
+    "--show",
+    is_flag=True,
+    help="Show current configuration"
+)
+def setup(show: bool):
+    """Run interactive setup wizard to configure dbinit."""
+    if show:
+        try:
+            show_config()
+        except Exception as e:
+            click.echo(f"Error: {e}", err=True)
+            sys.exit(1)
+    else:
+        try:
+            run_setup_wizard()
+        except KeyboardInterrupt:
+            click.echo("\n\nSetup cancelled by user.", err=True)
+            sys.exit(1)
+        except Exception as e:
+            click.echo(f"\nError: {e}", err=True)
+            sys.exit(1)
 
 
 if __name__ == "__main__":
