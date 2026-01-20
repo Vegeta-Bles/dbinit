@@ -9,7 +9,7 @@ from .config import get_config_value
 
 
 @click.group()
-@click.version_option(version="0.2.0")
+@click.version_option(version="0.2.2")
 def cli():
     """dbinit - Interactive database initialization tool."""
     pass
