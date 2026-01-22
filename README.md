@@ -68,28 +68,24 @@ See [SETUP_GUIDE.md](SETUP_GUIDE.md) for detailed setup instructions.
 
 ### Create a New Database Project
 
-The `create` command runs in interactive/guided mode by default:
+The `create` command runs in fully interactive/guided mode:
 
 ```bash
-# Uses your configured default database type
 dbinit create myproject
-
-# Or specify database type explicitly
-dbinit create myproject --db postgres
-dbinit create myproject --db sqlite
 ```
 
 **Interactive Creation Process:**
-1. 🎯 Guided wizard welcomes you and shows project details
-2. 🔐 Prompts for database username
-3. 🔒 Prompts for password (hidden input)
-4. ✅ Validates password strength
-5. 🔁 Requires password confirmation
-6. 📁 Generates complete project structure
-7. 🚀 Starts the database (for PostgreSQL, if auto-start enabled)
-8. 📝 Shows next steps and helpful commands
+1. 🗄️ **Database Type Selection** - Choose PostgreSQL or SQLite (numbered menu)
+2. 🎯 Guided wizard welcomes you and shows project details
+3. 🔐 Prompts for database username
+4. 🔒 Prompts for password (hidden input)
+5. ✅ Validates password strength
+6. 🔁 Requires password confirmation
+7. 📁 Generates complete project structure
+8. 🚀 Starts the database (for PostgreSQL, if auto-start enabled)
+9. 📝 Shows next steps and helpful commands
 
-The interactive mode provides step-by-step guidance and clear feedback throughout the process.
+The interactive mode provides step-by-step guidance with numbered choices and clear feedback throughout the process.
 
 ### View Stored Credentials
 

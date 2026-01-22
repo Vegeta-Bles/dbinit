@@ -18,19 +18,29 @@ def cli():
 
 @cli.command()
 @click.argument("project", type=str)
-@click.option(
-    "--db",
-    type=click.Choice(["postgres", "sqlite"], case_sensitive=False),
-    required=False,
-    help="Database type: postgres or sqlite (defaults to configured preference)"
-)
-def create(project: str, db: str):
+def create(project: str):
     """Create a new database project with interactive credential setup."""
     try:
-        # Use configured default if --db not provided
-        if db is None:
-            db = get_config_value("default_db_type", "postgres")
-            click.echo(f"Using default database type: {db}")
+        # Interactive database type selection
+        from .setup_wizard import prompt_choice
+        
+        click.echo("\n" + "="*60)
+        click.echo("  Database Type Selection")
+        click.echo("="*60)
+        click.echo("\nWhich database type would you like to use?")
+        
+        db_options = ["PostgreSQL (via Docker)", "SQLite"]
+        default_db = get_config_value("default_db_type", "postgres")
+        default_idx = 1 if default_db == "postgres" else 2
+        
+        choice = prompt_choice(
+            "Select database type:",
+            db_options,
+            default=default_idx
+        )
+        
+        db = "postgres" if choice == 1 else "sqlite"
+        click.echo(f"\n✓ Selected: {db_options[choice - 1]}\n")
         
         # Always run in interactive mode for better UX
         create_project(project, db.lower(), interactive=True)
