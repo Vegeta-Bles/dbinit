@@ -6,6 +6,7 @@ from pathlib import Path
 from .commands import create_project, show_credentials
 from .setup_wizard import run_setup_wizard, show_config
 from .config import get_config_value
+from .upgrade import upgrade_database_project
 
 
 @click.group()
@@ -31,7 +32,8 @@ def create(project: str, db: str):
             db = get_config_value("default_db_type", "postgres")
             click.echo(f"Using default database type: {db}")
         
-        create_project(project, db.lower())
+        # Always run in interactive mode for better UX
+        create_project(project, db.lower(), interactive=True)
     except KeyboardInterrupt:
         click.echo("\n\nOperation cancelled by user.", err=True)
         sys.exit(1)
@@ -87,6 +89,20 @@ def setup(show: bool):
         except Exception as e:
             click.echo(f"\nError: {e}", err=True)
             sys.exit(1)
+
+
+@cli.command()
+@click.argument("project", type=str)
+def upgrade_db(project: str):
+    """Upgrade a database project to the current dbinit version."""
+    try:
+        upgrade_database_project(project)
+    except KeyboardInterrupt:
+        click.echo("\n\nUpgrade cancelled by user.", err=True)
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"\nError: {e}", err=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

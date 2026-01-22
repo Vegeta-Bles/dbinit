@@ -4,12 +4,16 @@ Interactive database initialization tool for setting up local databases with sec
 
 ## Features
 
-- Interactive credential setup with password hiding
-- Password strength validation
-- Support for PostgreSQL (via Docker) and SQLite
-- Automatic project scaffolding
-- Secure credential storage in `.env` files
-- Never prints passwords by default
+- 🎯 **Interactive Setup Wizard** - Guided configuration with numbered choices
+- 🔐 **Interactive Credential Setup** - Password hiding and strength validation
+- 🗄️ **Multiple Database Support** - PostgreSQL (via Docker) and SQLite
+- 📁 **Automatic Project Scaffolding** - Complete project structure generation
+- 🔒 **Secure Credential Storage** - Credentials stored in `.env` files (never committed)
+- 🚀 **Auto-start Databases** - Automatically start PostgreSQL containers
+- 🎨 **Editor Detection** - Automatically detects and lists available editors
+- 🔄 **Database Upgrades** - Upgrade existing projects to new dbinit versions
+- ⚙️ **Persistent Configuration** - Settings saved and remembered
+- 🛡️ **Password Security** - Passwords never printed by default
 
 ## Installation
 
@@ -64,27 +68,51 @@ See [SETUP_GUIDE.md](SETUP_GUIDE.md) for detailed setup instructions.
 
 ### Create a New Database Project
 
-```bash
-# PostgreSQL project
-dbinit create myproject --db postgres
+The `create` command runs in interactive/guided mode by default:
 
-# SQLite project
+```bash
+# Uses your configured default database type
+dbinit create myproject
+
+# Or specify database type explicitly
+dbinit create myproject --db postgres
 dbinit create myproject --db sqlite
 ```
 
-The tool will:
-1. Prompt for database username
-2. Prompt for password (hidden input)
-3. Validate password strength
-4. Require password confirmation
-5. Generate project structure
-6. Start the database (for PostgreSQL)
+**Interactive Creation Process:**
+1. 🎯 Guided wizard welcomes you and shows project details
+2. 🔐 Prompts for database username
+3. 🔒 Prompts for password (hidden input)
+4. ✅ Validates password strength
+5. 🔁 Requires password confirmation
+6. 📁 Generates complete project structure
+7. 🚀 Starts the database (for PostgreSQL, if auto-start enabled)
+8. 📝 Shows next steps and helpful commands
+
+The interactive mode provides step-by-step guidance and clear feedback throughout the process.
 
 ### View Stored Credentials
 
 ```bash
 dbinit creds --show myproject
 ```
+
+### Upgrade Database Project
+
+When dbinit updates, upgrade your existing database projects to the new version:
+
+```bash
+dbinit upgrade-db myproject
+```
+
+This command will:
+- Detect your project's database type
+- Preserve your existing credentials
+- Regenerate project files with latest templates
+- Update configuration files
+- Mark project with current dbinit version
+
+**Note:** Always backup your project before upgrading, especially if you have custom modifications.
 
 ## Project Structure
 
@@ -115,10 +143,38 @@ Passwords must meet the following criteria:
 - Use `dbinit creds --show` to view credentials when needed
 - Never commit `.env` files to version control
 
+## Commands Summary
+
+| Command | Description |
+|---------|-------------|
+| `dbinit setup` | Interactive setup wizard to configure dbinit |
+| `dbinit create <project>` | Create a new database project (interactive mode) |
+| `dbinit creds --show <project>` | View stored database credentials |
+| `dbinit upgrade-db <project>` | Upgrade existing project to current dbinit version |
+
 ## Requirements
 
 - Python 3.7+
 - Docker and Docker Compose (for PostgreSQL projects)
+
+## Upgrade Workflow
+
+When you update dbinit to a new version:
+
+```bash
+# 1. Upgrade dbinit
+pip install --upgrade dbinit
+
+# 2. Upgrade your existing projects
+dbinit upgrade-db myproject1
+dbinit upgrade-db myproject2
+```
+
+The upgrade command will:
+- ✅ Preserve your credentials
+- ✅ Update project files to latest templates
+- ✅ Maintain your database data
+- ✅ Update configuration files
 
 ## License
 

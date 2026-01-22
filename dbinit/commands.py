@@ -63,13 +63,23 @@ def prompt_credentials() -> Tuple[str, str]:
     return username, password
 
 
-def create_project(project_name: str, db_type: str):
+def create_project(project_name: str, db_type: str, interactive: bool = True):
     """Create a new database project.
     
     Args:
         project_name: Name of the project
         db_type: Type of database ('postgres' or 'sqlite')
+        interactive: Whether to run in interactive/guided mode
     """
+    from .__init__ import __version__
+    
+    if interactive:
+        click.echo("\n" + "="*60)
+        click.echo("  dbinit Project Creation Wizard")
+        click.echo("="*60)
+        click.echo(f"\nWelcome! Let's set up your '{project_name}' database project.")
+        click.echo(f"Database type: {db_type.upper()}\n")
+    
     # Use configured default path if project name is relative
     if not Path(project_name).is_absolute():
         default_path = get_default_project_path()
@@ -79,7 +89,9 @@ def create_project(project_name: str, db_type: str):
     
     # Check if project already exists
     if project_path.exists():
-        if not click.confirm(f"Directory '{project_name}' already exists. Overwrite?"):
+        if interactive:
+            click.echo(f"⚠️  Directory '{project_name}' already exists.")
+        if not click.confirm(f"Overwrite existing directory?"):
             click.echo("Operation cancelled.")
             return
         # Remove existing directory
@@ -87,12 +99,24 @@ def create_project(project_name: str, db_type: str):
     
     # Create project directory
     project_path.mkdir(parents=True, exist_ok=True)
+    
+    if interactive:
+        click.echo(f"\n📁 Creating project directory: {project_path}")
+    
     click.echo(f"\nCreating project '{project_name}' with {db_type} database...")
     
     # Get credentials
+    if interactive:
+        click.echo("\n" + "-"*60)
+        click.echo("  Step 1: Database Credentials")
+        click.echo("-"*60)
     username, password = prompt_credentials()
     
     # Generate project files
+    if interactive:
+        click.echo("\n" + "-"*60)
+        click.echo("  Step 2: Generating Project Files")
+        click.echo("-"*60)
     click.echo("\nGenerating project files...")
     
     if db_type == "postgres":
@@ -151,14 +175,27 @@ def create_project(project_name: str, db_type: str):
     readme_content = generate_readme(project_name, db_type, username)
     (project_path / "README.md").write_text(readme_content)
     
-    click.echo(f"\n✓ Project '{project_name}' created successfully!")
-    click.echo(f"\nNext steps:")
-    click.echo(f"  cd {project_name}")
+    # Save version marker
+    from .__init__ import __version__
+    (project_path / ".dbinit-version").write_text(__version__)
+    
+    if interactive:
+        click.echo("\n" + "="*60)
+        click.echo("  ✓ Project Created Successfully!")
+        click.echo("="*60)
+    else:
+        click.echo(f"\n✓ Project '{project_name}' created successfully!")
+    
+    click.echo(f"\n📦 Project Location: {project_path}")
+    click.echo(f"\n🚀 Next Steps:")
+    click.echo(f"  cd {project_path.name}")
     if db_type == "postgres":
         click.echo(f"  # Database is already running")
-        click.echo(f"  # To stop: docker-compose down")
-        click.echo(f"  # To start: docker-compose up -d")
+        compose_cmd = get_config_value("docker_compose_cmd", "docker-compose")
+        click.echo(f"  # To stop: {compose_cmd} down")
+        click.echo(f"  # To start: {compose_cmd} up -d")
     click.echo(f"  # View credentials: dbinit creds --show {project_name}")
+    click.echo(f"  # Upgrade project: dbinit upgrade-db {project_name}")
 
 
 def show_credentials(project_name: str):
