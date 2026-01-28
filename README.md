@@ -208,44 +208,6 @@ The release script will:
 5. ✅ Optionally push to GitHub
 6. ✅ Optionally publish to PyPI
 
-## Publishing to PyPI
-
-For maintainers, to publish new versions:
-
-### Setup (one-time)
-
-1. **Set up environment variables:**
-   ```bash
-   # Option 1: Use the setup script (recommended)
-   source scripts/setup-pypi-env.sh
-   
-   # Option 2: Set manually
-   export TWINE_API_TOKEN='your-pypi-api-token'
-   export TWINE_USERNAME='__token__'
-   ```
-
-2. **Or add to your shell profile** (`~/.zshrc` or `~/.bashrc`):
-   ```bash
-   export TWINE_API_TOKEN='your-pypi-api-token'
-   export TWINE_USERNAME='__token__'
-   ```
-
-### Build and Publish
-
-```bash
-# Build only
-./scripts/build-and-publish.sh
-
-# Build and publish to PyPI
-./scripts/build-and-publish.sh --publish
-```
-
-The script will:
-- Clean previous builds
-- Build the package
-- Check the package
-- Publish to PyPI (if `--publish` flag is used)
-
 ## License
 
 MIT
