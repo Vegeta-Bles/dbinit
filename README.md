@@ -180,17 +180,71 @@ The upgrade command will:
 
 **Auto-start fails for PostgreSQL**
 - dbinit uses the configured Docker Compose command (`docker compose` v2 or `docker-compose` v1). If the wrong command is configured, re-run `dbinit setup` and pick the other option.
-- If Docker isn’t running, `docker compose up -d` will fail—start Docker Desktop or your daemon and retry.
+- If Docker isn't running, `docker compose up -d` will fail—start Docker Desktop or your daemon and retry.
 - If auto-start is disabled, dbinit prints the manual command to run in the generated project directory.
 
 **"docker-compose not found" warning**
-- This means the configured compose command isn’t available on your PATH. Install Docker Compose or switch to the alternative command in `dbinit setup`.
+- This means the configured compose command isn't available on your PATH. Install Docker Compose or switch to the alternative command in `dbinit setup`.
 
 **Permissions errors when creating a project**
 - dbinit writes to the configured default project path and creates a `.env` file plus `docker-compose.yml` (PostgreSQL). Ensure the target directory is writable, or choose a new path in `dbinit setup`.
 
-**`dbinit upgrade-db` can’t find my project**
+**`dbinit upgrade-db` can't find my project**
 - If you created the project with a relative name, dbinit looks in the default project path (`~/.dbinit/config.json`). Either run the command from an absolute path (e.g., `dbinit upgrade-db /full/path/myproject`) or update the default path in setup.
+
+## Release Process
+
+To create a new release:
+
+```bash
+./scripts/release.sh
+```
+
+The release script will:
+1. ✅ Prompt for new version number
+2. ✅ Update version in all files
+3. ✅ Build the package
+4. ✅ Create git commit and tag
+5. ✅ Optionally push to GitHub
+6. ✅ Optionally publish to PyPI
+
+## Publishing to PyPI
+
+For maintainers, to publish new versions:
+
+### Setup (one-time)
+
+1. **Set up environment variables:**
+   ```bash
+   # Option 1: Use the setup script (recommended)
+   source scripts/setup-pypi-env.sh
+   
+   # Option 2: Set manually
+   export TWINE_API_TOKEN='your-pypi-api-token'
+   export TWINE_USERNAME='__token__'
+   ```
+
+2. **Or add to your shell profile** (`~/.zshrc` or `~/.bashrc`):
+   ```bash
+   export TWINE_API_TOKEN='your-pypi-api-token'
+   export TWINE_USERNAME='__token__'
+   ```
+
+### Build and Publish
+
+```bash
+# Build only
+./scripts/build-and-publish.sh
+
+# Build and publish to PyPI
+./scripts/build-and-publish.sh --publish
+```
+
+The script will:
+- Clean previous builds
+- Build the package
+- Check the package
+- Publish to PyPI (if `--publish` flag is used)
 
 ## License
 

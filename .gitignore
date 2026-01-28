@@ -43,3 +43,8 @@ htmlcov/
 *.egg-info/
 dist/
 build/
+
+# Environment and secrets
+.env
+.env.local
+scripts/setup-pypi-env.sh
