@@ -10,7 +10,7 @@ from .upgrade import upgrade_database_project
 
 
 @click.group()
-@click.version_option(version="0.2.4")
+@click.version_option(version="0.2.5")
 def cli():
     """dbinit - Interactive database initialization tool."""
     pass

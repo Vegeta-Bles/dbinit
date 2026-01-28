@@ -83,7 +83,47 @@ fi
 
 ## Connecting to Your Database
 
-### SQLite Database Connection
+### Quick Connect (Recommended)
+
+dbinit provides a simple connection helper:
+
+```python
+import dbinit
+import sqlite3
+
+# Get connection info (automatically reads from .env)
+conn_info = dbinit.connect()
+
+# Access connection details (with helpful comments!)
+db_path = conn_info.db_path        # Full path to SQLite database file (e.g., '/path/to/test.db')
+db_username = conn_info.db_username  # Database username from .env file
+db_password = conn_info.db_password  # Database password from .env file
+db_name = conn_info.db_name         # Database name (e.g., 'test.db' for SQLite)
+db_type = conn_info.db_type          # Database type: 'sqlite' or 'postgres'
+
+# For SQLite, connect directly:
+conn = sqlite3.connect(conn_info.db_path)
+cursor = conn.cursor()
+# ... use database
+conn.close()
+
+# Or use the helper function:
+conn = dbinit.get_sqlite_connection()  # Returns sqlite3.Connection
+```
+
+**For PostgreSQL:**
+```python
+import dbinit
+import psycopg2
+
+conn_info = dbinit.connect()
+conn_string = dbinit.get_postgres_connection_string()
+
+# Use with psycopg2
+conn = psycopg2.connect(conn_string)
+```
+
+### SQLite Database Connection (Manual)
 
 SQLite databases are created automatically when you first connect to them. The database file will be created in your project root directory.
 
