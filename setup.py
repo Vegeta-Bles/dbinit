@@ -17,6 +17,7 @@ setup(
     author_email="pang.seth@example.com",
     url="https://github.com/Vegeta-Bles/dbinit",
     license="MIT",
+    license_files=["LICENSE"],
     packages=find_packages(),
     install_requires=[
         "click>=8.0.0",
@@ -30,6 +31,7 @@ setup(
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",

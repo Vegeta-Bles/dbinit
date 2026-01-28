@@ -172,6 +172,26 @@ The upgrade command will:
 - ✅ Maintain your database data
 - ✅ Update configuration files
 
+## Troubleshooting
+
+**`dbinit create` puts projects in an unexpected directory**
+- If you pass a relative project name (e.g., `dbinit create myproject`), dbinit uses the configured default project path from `~/.dbinit/config.json`.
+- Run `dbinit setup --show` to confirm the saved default path, or re-run `dbinit setup` to update it.
+
+**Auto-start fails for PostgreSQL**
+- dbinit uses the configured Docker Compose command (`docker compose` v2 or `docker-compose` v1). If the wrong command is configured, re-run `dbinit setup` and pick the other option.
+- If Docker isn’t running, `docker compose up -d` will fail—start Docker Desktop or your daemon and retry.
+- If auto-start is disabled, dbinit prints the manual command to run in the generated project directory.
+
+**"docker-compose not found" warning**
+- This means the configured compose command isn’t available on your PATH. Install Docker Compose or switch to the alternative command in `dbinit setup`.
+
+**Permissions errors when creating a project**
+- dbinit writes to the configured default project path and creates a `.env` file plus `docker-compose.yml` (PostgreSQL). Ensure the target directory is writable, or choose a new path in `dbinit setup`.
+
+**`dbinit upgrade-db` can’t find my project**
+- If you created the project with a relative name, dbinit looks in the default project path (`~/.dbinit/config.json`). Either run the command from an absolute path (e.g., `dbinit upgrade-db /full/path/myproject`) or update the default path in setup.
+
 ## License
 
 MIT
