@@ -42,6 +42,11 @@ def create(project: str):
         db = "postgres" if choice == 1 else "sqlite"
         click.echo(f"\n✓ Selected: {db_options[choice - 1]}\n")
         
+        # Check for Docker if PostgreSQL is selected
+        if db == "postgres":
+            from .docker_check import warn_if_docker_not_installed
+            warn_if_docker_not_installed()
+        
         # Always run in interactive mode for better UX
         create_project(project, db.lower(), interactive=True)
     except KeyboardInterrupt:

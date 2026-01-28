@@ -131,28 +131,41 @@ def create_project(project_name: str, db_type: str, interactive: bool = True):
         # Start the database (if auto-start is enabled)
         auto_start = get_config_value("auto_start_db", True)
         if auto_start:
-            click.echo("\nStarting database container...")
-            compose_cmd = get_config_value("docker_compose_cmd", "docker-compose")
-            try:
-                # Handle both "docker-compose" and "docker compose" (v2)
-                if compose_cmd == "docker compose":
-                    cmd = ["docker", "compose", "up", "-d"]
-                else:
-                    cmd = [compose_cmd, "up", "-d"]
-                
-                subprocess.run(
-                    cmd,
-                    cwd=project_path,
-                    check=True,
-                    capture_output=True
-                )
-                click.echo("✓ Database container started successfully!")
-            except subprocess.CalledProcessError as e:
-                click.echo(f"Warning: Failed to start database container: {e}", err=True)
-                click.echo(f"You can start it manually with: {compose_cmd} up -d", err=True)
-            except FileNotFoundError:
-                click.echo("Warning: docker-compose not found. Please install Docker Compose.", err=True)
-                click.echo(f"You can start the database later with: {compose_cmd} up -d", err=True)
+            from .docker_check import check_docker_installed, get_docker_install_command
+            
+            # Check Docker before attempting to start
+            if not check_docker_installed():
+                click.echo("\n⚠️  Skipping auto-start: Docker is not installed.", err=True)
+                install_cmd = get_docker_install_command()
+                click.echo(f"Install Docker with: {install_cmd}", err=True)
+                click.echo("After installing Docker, start the database with:", err=True)
+                compose_cmd = get_config_value("docker_compose_cmd", "docker-compose")
+                click.echo(f"  cd {project_path} && {compose_cmd} up -d", err=True)
+            else:
+                click.echo("\nStarting database container...")
+                compose_cmd = get_config_value("docker_compose_cmd", "docker-compose")
+                try:
+                    # Handle both "docker-compose" and "docker compose" (v2)
+                    if compose_cmd == "docker compose":
+                        cmd = ["docker", "compose", "up", "-d"]
+                    else:
+                        cmd = [compose_cmd, "up", "-d"]
+                    
+                    subprocess.run(
+                        cmd,
+                        cwd=project_path,
+                        check=True,
+                        capture_output=True
+                    )
+                    click.echo("✓ Database container started successfully!")
+                except subprocess.CalledProcessError as e:
+                    click.echo(f"Warning: Failed to start database container: {e}", err=True)
+                    click.echo(f"You can start it manually with: {compose_cmd} up -d", err=True)
+                except FileNotFoundError:
+                    click.echo("Warning: docker-compose not found. Please install Docker Compose.", err=True)
+                    install_cmd = get_docker_install_command()
+                    click.echo(f"Install Docker with: {install_cmd}", err=True)
+                    click.echo(f"You can start the database later with: {compose_cmd} up -d", err=True)
         else:
             click.echo("\nSkipping auto-start (disabled in configuration).")
             compose_cmd = get_config_value("docker_compose_cmd", "docker-compose")
@@ -190,10 +203,19 @@ def create_project(project_name: str, db_type: str, interactive: bool = True):
     click.echo(f"\n🚀 Next Steps:")
     click.echo(f"  cd {project_path.name}")
     if db_type == "postgres":
-        click.echo(f"  # Database is already running")
-        compose_cmd = get_config_value("docker_compose_cmd", "docker-compose")
-        click.echo(f"  # To stop: {compose_cmd} down")
-        click.echo(f"  # To start: {compose_cmd} up -d")
+        from .docker_check import check_docker_installed
+        if check_docker_installed():
+            click.echo(f"  # Database is already running")
+            compose_cmd = get_config_value("docker_compose_cmd", "docker-compose")
+            click.echo(f"  # To stop: {compose_cmd} down")
+            click.echo(f"  # To start: {compose_cmd} up -d")
+        else:
+            compose_cmd = get_config_value("docker_compose_cmd", "docker-compose")
+            click.echo(f"  # Install Docker first, then start with: {compose_cmd} up -d")
+    elif db_type == "sqlite":
+        db_file = f"{project_name}.db"
+        click.echo(f"  # Database file: {db_file} (created on first connection)")
+        click.echo(f"  # Database location: {project_path / db_file}")
     click.echo(f"  # View credentials: dbinit creds --show {project_name}")
     click.echo(f"  # Upgrade project: dbinit upgrade-db {project_name}")
 

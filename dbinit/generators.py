@@ -183,11 +183,20 @@ This project uses SQLite.
 
 The database file will be created automatically on first connection.
 
+### Database File Location
+
+The SQLite database file (`{project_name}.db`) will be created in the project root directory when your application first connects to it.
+
+**Full path:** `{project_name}.db` (in this directory)
+
 ### Connection Details
 
 - Database file: `{project_name}.db`
+- Database location: Project root directory
 - Username: {username}
 - Password: See `.env` file or run `dbinit creds --show {project_name}`
+
+**Note:** The database file is automatically added to `.gitignore` to prevent accidental commits.
 """
     
     return f"""# {project_name}
@@ -211,12 +220,50 @@ Database migrations should be placed in the `migrations/` directory.
 
 ## Development
 
-1. Load environment variables from `.env`:
-   ```bash
-   export $(cat .env | xargs)
-   ```
+### Connecting to the Database
 
-2. Connect to the database using your preferred database client or ORM.
+**Using Python (sqlite3):**
+```python
+import sqlite3
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv()
+
+# Get database path
+db_name = os.getenv("DB_NAME", "{project_name}.db")
+db_path = Path(".") / db_name
+
+# Connect (SQLite doesn't require username/password)
+conn = sqlite3.connect(str(db_path))
+cursor = conn.cursor()
+
+# Use the database
+cursor.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT)")
+conn.commit()
+conn.close()
+```
+
+**Using Command Line:**
+```bash
+# Install sqlite3 if needed (usually pre-installed on macOS/Linux)
+sqlite3 {project_name}.db
+
+# Then run SQL commands:
+# .tables          # List all tables
+# .schema          # Show database schema
+# SELECT * FROM users;
+# .quit            # Exit
+```
+
+**Using Python-dotenv:**
+```bash
+pip install python-dotenv
+```
+
+**Note:** SQLite doesn't enforce username/password authentication. The credentials in `.env` are stored for reference and consistency with PostgreSQL projects.
 
 ## Security Notes
 
