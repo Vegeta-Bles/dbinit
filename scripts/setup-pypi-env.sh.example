@@ -1,0 +1,17 @@
+#!/bin/bash
+# Setup PyPI environment variables - EXAMPLE FILE
+# Copy this file to setup-pypi-env.sh and add your actual token
+
+# Your PyPI API token
+export TWINE_API_TOKEN='your-pypi-api-token-here'
+export TWINE_USERNAME='__token__'
+export TWINE_PASSWORD="$TWINE_API_TOKEN"
+
+echo "✅ PyPI environment variables set!"
+echo ""
+echo "To use in current shell, run:"
+echo "  source scripts/setup-pypi-env.sh"
+echo ""
+echo "Or add to your ~/.zshrc or ~/.bashrc:"
+echo "  export TWINE_API_TOKEN='your-token-here'"
+echo "  export TWINE_USERNAME='__token__'"
