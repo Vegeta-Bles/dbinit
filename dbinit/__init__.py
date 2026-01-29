@@ -3,12 +3,21 @@
 __version__ = "0.2.5"
 
 # Import connection helpers for easy access
-from .connect import connect, get_connection_info, get_sqlite_connection, get_postgres_connection_string
+from .connect import (
+    connect,
+    connect_db,
+    get_connection_info,
+    get_connection_info_obj,
+    get_sqlite_connection,
+    get_postgres_connection_string
+)
 
 __all__ = [
     "__version__",
     "connect",
+    "connect_db",
     "get_connection_info",
+    "get_connection_info_obj",
     "get_sqlite_connection",
     "get_postgres_connection_string",
 ]

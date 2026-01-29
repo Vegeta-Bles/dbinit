@@ -222,26 +222,30 @@ Database migrations should be placed in the `migrations/` directory.
 
 ### Connecting to the Database
 
-**Quick Connect (Recommended):**
+**Quick Connect (Recommended - One Line!):**
 ```python
 import dbinit
-import sqlite3
 
-# Get connection info (automatically reads from .env)
-conn_info = dbinit.connect()
+# One line - automatically detects type and connects!
+conn = dbinit.connect()  # Returns ready-to-use connection
+cursor = conn.cursor()
+cursor.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT)")
+conn.commit()
+conn.close()
+```
+
+**Get Connection Info (if you need details without connecting):**
+```python
+import dbinit
+
+# Get connection info object (doesn't actually connect)
+conn_info = dbinit.get_connection_info_obj()
 
 # Access connection details (with helpful comments!)
 db_path = conn_info.db_path        # Full path to SQLite database file (e.g., '/path/to/test.db')
 db_username = conn_info.db_username  # Database username from .env file
 db_password = conn_info.db_password  # Database password from .env file
 db_name = conn_info.db_name         # Database name (e.g., 'test.db' for SQLite)
-
-# Connect to SQLite
-conn = dbinit.get_sqlite_connection()  # Returns sqlite3.Connection
-cursor = conn.cursor()
-cursor.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT)")
-conn.commit()
-conn.close()
 ```
 
 **Manual Connection:**

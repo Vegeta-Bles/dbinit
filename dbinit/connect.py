@@ -92,9 +92,53 @@ def get_connection_info(project_path: Optional[Path] = None) -> Dict[str, Any]:
 
 
 def connect(project_path: Optional[Path] = None):
-    """Get database connection information.
+    """One-line database connection - automatically detects type and returns connection.
     
-    Returns a simple object with connection attributes for easy access.
+    This is the easiest way to connect to your database. It automatically:
+    - Reads from .env file
+    - Detects database type (SQLite or PostgreSQL)
+    - Returns a ready-to-use connection object
+    
+    Args:
+        project_path: Path to project directory. If None, uses current directory.
+        
+    Returns:
+        - For SQLite: sqlite3.Connection object
+        - For PostgreSQL: psycopg2 connection object (or connection string if psycopg2 not installed)
+        
+    Example:
+        >>> import dbinit
+        >>> conn = dbinit.connect()  # One line!
+        >>> cursor = conn.cursor()
+        >>> cursor.execute("SELECT * FROM users")
+        
+    Raises:
+        ValueError: If database type is not supported
+        FileNotFoundError: If .env file not found
+    """
+    info = get_connection_info(project_path)
+    db_type = info.get("db_type", "sqlite")
+    
+    if db_type == "sqlite":
+        return get_sqlite_connection(project_path)
+    elif db_type == "postgres":
+        # For PostgreSQL, try to return actual connection if psycopg2 is available
+        try:
+            import psycopg2
+            conn_string = get_postgres_connection_string(project_path)
+            return psycopg2.connect(conn_string)
+        except ImportError:
+            # If psycopg2 not installed, return connection string
+            return get_postgres_connection_string(project_path)
+    else:
+        raise ValueError(f"Unsupported database type: {db_type}")
+
+
+def get_connection_info_obj(project_path: Optional[Path] = None):
+    """Get database connection information as an object with attributes.
+    
+    Use this if you need to access connection details (like db_path, db_username, etc.)
+    without actually connecting to the database.
     
     Args:
         project_path: Path to project directory. If None, uses current directory.
@@ -111,7 +155,7 @@ def connect(project_path: Optional[Path] = None):
         
     Example:
         >>> import dbinit
-        >>> conn_info = dbinit.connect()
+        >>> conn_info = dbinit.get_connection_info_obj()
         >>> print(conn_info.db_path)
         >>> print(conn_info.db_username)
     """
@@ -188,3 +232,11 @@ def get_postgres_connection_string(project_path: Optional[Path] = None) -> str:
     db_name = info.get("db_name", "")
     
     return f"postgresql://{user}:{password}@{host}:{port}/{db_name}"
+
+
+def connect_db(project_path: Optional[Path] = None):
+    """Alias for connect() - returns a database connection object.
+    
+    This is the same as dbinit.connect(). Use dbinit.connect() for consistency.
+    """
+    return connect(project_path)
