@@ -235,6 +235,199 @@ conn_string = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{
 # Use with your database library
 ```
 
+## Working with Your Database
+
+### SQLite - Terminal Commands
+
+**Connect to your database:**
+```bash
+cd myproject
+sqlite3 myproject.db
+```
+
+**Create a table:**
+```sql
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**Insert data:**
+```sql
+-- Insert a single row
+INSERT INTO users (name, email) VALUES ('John Doe', 'john@example.com');
+
+-- Insert multiple rows
+INSERT INTO users (name, email) VALUES 
+    ('Jane Smith', 'jane@example.com'),
+    ('Bob Johnson', 'bob@example.com');
+```
+
+**Query data:**
+```sql
+-- Select all rows
+SELECT * FROM users;
+
+-- Select specific columns
+SELECT name, email FROM users;
+
+-- Select with conditions
+SELECT * FROM users WHERE email = 'john@example.com';
+
+-- Count rows
+SELECT COUNT(*) FROM users;
+```
+
+**Update data:**
+```sql
+UPDATE users SET email = 'john.doe@example.com' WHERE id = 1;
+```
+
+**Delete data:**
+```sql
+DELETE FROM users WHERE id = 1;
+```
+
+**Useful SQLite commands:**
+```sql
+.tables          # List all tables
+.schema          # Show database schema
+.schema users    # Show schema for specific table
+.headers on      # Show column headers in SELECT results
+.mode column     # Display results in column format
+.quit            # Exit sqlite3
+```
+
+### PostgreSQL - Terminal Commands
+
+**Connect to your database:**
+```bash
+cd myproject
+export $(cat .env | xargs)
+psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME
+```
+
+**Create a table:**
+```sql
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**Insert data:**
+```sql
+-- Insert a single row
+INSERT INTO users (name, email) VALUES ('John Doe', 'john@example.com');
+
+-- Insert multiple rows
+INSERT INTO users (name, email) VALUES 
+    ('Jane Smith', 'jane@example.com'),
+    ('Bob Johnson', 'bob@example.com');
+```
+
+**Query data:**
+```sql
+-- Select all rows
+SELECT * FROM users;
+
+-- Select specific columns
+SELECT name, email FROM users;
+
+-- Select with conditions
+SELECT * FROM users WHERE email = 'john@example.com';
+
+-- Count rows
+SELECT COUNT(*) FROM users;
+```
+
+**Update data:**
+```sql
+UPDATE users SET email = 'john.doe@example.com' WHERE id = 1;
+```
+
+**Delete data:**
+```sql
+DELETE FROM users WHERE id = 1;
+```
+
+**Useful PostgreSQL commands:**
+```sql
+\dt              # List all tables
+\d users         # Describe table structure
+\l               # List all databases
+\c database_name # Connect to a different database
+\q               # Exit psql
+```
+
+### Python Examples
+
+**Create table and insert data:**
+```python
+import dbinit
+
+conn = dbinit.connect()
+cursor = conn.cursor()
+
+# Create table
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL
+    )
+""")
+
+# Insert data
+cursor.execute("INSERT INTO users (name, email) VALUES (?, ?)", 
+               ("John Doe", "john@example.com"))
+
+# Insert multiple rows
+users = [
+    ("Jane Smith", "jane@example.com"),
+    ("Bob Johnson", "bob@example.com")
+]
+cursor.executemany("INSERT INTO users (name, email) VALUES (?, ?)", users)
+
+# Commit changes
+conn.commit()
+
+# Query data
+cursor.execute("SELECT * FROM users")
+rows = cursor.fetchall()
+for row in rows:
+    print(row)
+
+conn.close()
+```
+
+### Using dbinit CLI Commands
+
+**Add a row to a table:**
+```bash
+# Navigate to your project directory (or use project name)
+cd myproject
+
+# Add a row using key=value pairs
+dbinit add-row myproject users name="John Doe" email="john@example.com"
+
+# Add multiple columns at once
+dbinit add-row myproject users name="Jane Smith" email="jane@example.com" age=30
+
+# Works with both SQLite and PostgreSQL projects
+```
+
+**Note:** The `add-row` command automatically:
+- Connects to your database using credentials from `.env`
+- Validates the table exists
+- Inserts the data with proper escaping
+- Handles both SQLite and PostgreSQL syntax
+
 ### Using Environment Variables
 
 All database credentials are stored in the `.env` file. Load them in your application:

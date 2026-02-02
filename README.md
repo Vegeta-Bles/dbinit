@@ -76,7 +76,7 @@ dbinit create myproject
 
 **Interactive Creation Process:**
 1. 🗄️ **Database Type Selection** - Choose PostgreSQL or SQLite (numbered menu)
-2. 🎯 Guided wizard welcomes you and shows project details
+2. 🎯 Guided wizard shows project details and configuration settings
 3. 🔐 Prompts for database username
 4. 🔒 Prompts for password (hidden input)
 5. ✅ Validates password strength
@@ -85,7 +85,7 @@ dbinit create myproject
 8. 🚀 Starts the database (for PostgreSQL, if auto-start enabled)
 9. 📝 Shows next steps and helpful commands
 
-The interactive mode provides step-by-step guidance with numbered choices and clear feedback throughout the process.
+The interactive mode provides step-by-step guidance and clear feedback throughout the process.
 
 ### View Stored Credentials
 
@@ -107,6 +107,24 @@ This command will:
 - Regenerate project files with latest templates
 - Update configuration files
 - Mark project with current dbinit version
+
+### Add Data to Database
+
+Add rows to your database tables directly from the command line:
+
+```bash
+# Add a row to the users table
+dbinit add-row myproject users name="John Doe" email="john@example.com"
+
+# Add multiple columns
+dbinit add-row myproject users name="Jane Smith" email="jane@example.com" age=30
+```
+
+The command automatically:
+- Connects using credentials from `.env`
+- Handles both SQLite and PostgreSQL
+- Properly escapes values
+- Provides clear error messages
 
 **Note:** Always backup your project before upgrading, especially if you have custom modifications.
 
@@ -146,6 +164,7 @@ Passwords must meet the following criteria:
 | `dbinit setup` | Interactive setup wizard to configure dbinit |
 | `dbinit create <project>` | Create a new database project (interactive mode) |
 | `dbinit creds --show <project>` | View stored database credentials |
+| `dbinit add-row <project> <table> <key>=<value>...` | Add a row to a database table |
 | `dbinit upgrade-db <project>` | Upgrade existing project to current dbinit version |
 
 ## Requirements

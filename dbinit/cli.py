@@ -3,7 +3,7 @@
 import sys
 import click
 from pathlib import Path
-from .commands import create_project, show_credentials
+from .commands import create_project, show_credentials, add_row_to_table
 from .setup_wizard import run_setup_wizard, show_config
 from .config import get_config_value
 from .upgrade import upgrade_database_project
@@ -17,10 +17,21 @@ def cli():
 
 
 @cli.command()
-@click.argument("project", type=str)
+@click.argument("project", type=str, required=False)
 def create(project: str):
     """Create a new database project with interactive credential setup."""
     try:
+        # Prompt for project name if not provided
+        if not project:
+            click.echo("\n" + "="*60)
+            click.echo("  dbinit Project Creation")
+            click.echo("="*60)
+            project = click.prompt("\nProject name", type=str)
+            if not project.strip():
+                click.echo("Error: Project name cannot be empty.", err=True)
+                sys.exit(1)
+            project = project.strip()
+        
         # Interactive database type selection
         from .setup_wizard import prompt_choice
         
@@ -114,6 +125,30 @@ def upgrade_db(project: str):
         upgrade_database_project(project)
     except KeyboardInterrupt:
         click.echo("\n\nUpgrade cancelled by user.", err=True)
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"\nError: {e}", err=True)
+        sys.exit(1)
+
+
+@cli.command()
+@click.argument("project", type=str)
+@click.argument("table", type=str)
+@click.argument("data", nargs=-1, required=True)
+def add_row(project: str, table: str, data: tuple):
+    """Add a row to a database table.
+    
+    PROJECT: Name or path of the database project
+    TABLE: Name of the table to insert into
+    DATA: Column=value pairs (e.g., name="John Doe" email="john@example.com")
+    
+    Example:
+        dbinit add-row myproject users name="John Doe" email="john@example.com"
+    """
+    try:
+        add_row_to_table(project, table, data)
+    except KeyboardInterrupt:
+        click.echo("\n\nOperation cancelled by user.", err=True)
         sys.exit(1)
     except Exception as e:
         click.echo(f"\nError: {e}", err=True)

@@ -262,3 +262,100 @@ def show_credentials(project_name: str):
         click.echo(f"Database: {env_vars['POSTGRES_DB']}")
     
     click.echo()
+
+
+def add_row_to_table(project_name: str, table_name: str, data: tuple):
+    """Add a row to a database table.
+    
+    Args:
+        project_name: Name or path of the project
+        table_name: Name of the table to insert into
+        data: Tuple of key=value pairs (e.g., ("name=John Doe", "email=john@example.com"))
+    """
+    import json
+    import shlex
+    from .connect import connect, get_connection_info
+    
+    # Find project directory
+    project_path = Path(project_name)
+    if not project_path.is_absolute():
+        default_path = get_default_project_path()
+        project_path = default_path / project_name
+    
+    if not project_path.exists():
+        raise FileNotFoundError(f"Project '{project_name}' does not exist.")
+    
+    env_file = project_path / ".env"
+    if not env_file.exists():
+        raise FileNotFoundError(f"No .env file found in project '{project_name}'.")
+    
+    # Parse data from key=value pairs
+    row_data = {}
+    for item in data:
+        if "=" not in item:
+            raise ValueError(f"Invalid data format: '{item}'. Expected format: key=value")
+        
+        key, value = item.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        
+        # Remove quotes if present
+        if (value.startswith('"') and value.endswith('"')) or (value.startswith("'") and value.endswith("'")):
+            value = value[1:-1]
+        
+        # Try to parse as JSON (for numbers, booleans, etc.)
+        try:
+            value = json.loads(value)
+        except (json.JSONDecodeError, ValueError):
+            # Keep as string if not valid JSON
+            pass
+        
+        row_data[key] = value
+    
+    if not row_data:
+        raise ValueError("No data provided. Use format: key=value")
+    
+    # Connect to database
+    try:
+        conn = connect(project_path)
+        # Check if psycopg2 is not installed (connect returns string instead of connection)
+        if isinstance(conn, str):
+            raise ImportError(
+                "psycopg2 is required for PostgreSQL databases. "
+                "Install it with: pip install psycopg2-binary"
+            )
+    except ImportError:
+        raise
+    except Exception as e:
+        raise ConnectionError(f"Failed to connect to database: {e}")
+    
+    try:
+        cursor = conn.cursor()
+        
+        # Get database type
+        info = get_connection_info(project_path)
+        db_type = info.get("db_type", "sqlite")
+        
+        # Build INSERT statement
+        columns = list(row_data.keys())
+        values = list(row_data.values())
+        
+        if db_type == "sqlite":
+            placeholders = ", ".join(["?" for _ in columns])
+        else:  # postgres
+            placeholders = ", ".join(["%s" for _ in columns])
+        
+        columns_str = ", ".join(columns)
+        insert_sql = f"INSERT INTO {table_name} ({columns_str}) VALUES ({placeholders})"
+        
+        # Execute insert
+        try:
+            cursor.execute(insert_sql, values)
+            conn.commit()
+            click.echo(f"✓ Successfully added row to '{table_name}' table")
+        except Exception as e:
+            conn.rollback()
+            raise ValueError(f"Failed to insert row: {e}")
+        
+    finally:
+        conn.close()
